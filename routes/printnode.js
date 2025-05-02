@@ -44,9 +44,9 @@ router.post('/print', async (req, res) => {
 
     try {
         const response = await axios.post('https://api.printnode.com/printjobs', {
-            printerId: printerId,
-            contentType: 'pdf',
             content: base64PdfData,
+            printerId: printerId,
+            contentType: 'pdf_base64', // <-- Asegúrate de que esto sea 'pdf_base64'
             title: title || 'Documento para imprimir',
             source: 'Tu sitio web Vanilla'
         }, {
@@ -58,7 +58,20 @@ router.post('/print', async (req, res) => {
         res.json(response.data);
     } catch (error) {
         console.error('Error al enviar el trabajo de impresión:', error);
-        res.status(500).json({ error: 'No se pudo enviar el trabajo de impresión' });
+        if (error.response) {
+            // El servidor respondió con un código de estado diferente de 2xx
+            console.error("Detalles del error de PrintNode:", error.response.data);
+            res.status(error.response.status).json({
+                error: `Error de PrintNode: ${error.response.status} - ${error.response.data.message || 'Error desconocido'}`,
+                printNodeError: error.response.data
+            });
+        } else if (error.request) {
+            // No se recibió respuesta del servidor
+            res.status(500).json({ error: 'No se recibió respuesta del servidor de PrintNode' });
+        } else {
+            // Error al configurar la petición
+            res.status(500).json({ error: 'Error al configurar la petición: ' + error.message });
+        }
     }
 });
 

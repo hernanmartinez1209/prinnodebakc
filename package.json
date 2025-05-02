@@ -4,7 +4,8 @@
   "description": "Backend for PrintNode integration",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "install": "npm install"
   },
   "dependencies": {
     "axios": "^1.9.0",
